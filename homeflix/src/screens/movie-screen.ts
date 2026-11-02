@@ -1,5 +1,5 @@
 import type { AppContext } from '../app-context';
-import { artwork, button, progressBar } from '../components/ui';
+import { artwork, button, posterPanel, progressBar } from '../components/ui';
 import type { Video } from '../models/media';
 import type { Screen } from '../navigation/router';
 import { append, clear, h } from '../utils/dom';
@@ -21,6 +21,7 @@ export class MovieScreen implements Screen {
       { class: 'screen details' },
       artwork(video.title, video.artworkUrl, (path) => ctx.api.resolve(path), 'backdrop'),
       h('div', { class: 'details__shade' }),
+      posterPanel(video.title, video.artworkUrl, (path) => ctx.api.resolve(path), 'details__poster'),
       this.panel,
     );
   }

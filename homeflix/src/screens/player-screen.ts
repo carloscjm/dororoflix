@@ -149,7 +149,7 @@ export class PlayerScreen implements Screen {
   }
 
   async mount(): Promise<void> {
-    document.body.classList.add('is-playing');
+    document.documentElement.classList.add('is-playing');
     document.addEventListener('visibilitychange', this.onVisibility);
     window.addEventListener('pagehide', this.onPageHide);
     setScreenSaver(false);
@@ -242,7 +242,7 @@ export class PlayerScreen implements Screen {
     this.menu?.close();
     this.playback?.stop();
     this.playback = null;
-    document.body.classList.remove('is-playing');
+    document.documentElement.classList.remove('is-playing');
     document.removeEventListener('visibilitychange', this.onVisibility);
     window.removeEventListener('pagehide', this.onPageHide);
     setScreenSaver(true);

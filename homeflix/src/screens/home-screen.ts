@@ -1,6 +1,6 @@
 import { ApiError } from '../api/media-api';
 import type { AppContext } from '../app-context';
-import { artwork, brand, button, progressBar, row, spinner } from '../components/ui';
+import { artwork, brand, button, posterPanel, progressBar, row, spinner } from '../components/ui';
 import { buildHomeSections, type CardItem, type HomeSection } from '../models/library';
 import type { Screen } from '../navigation/router';
 import type { RemoteKey } from '../platform/keys';
@@ -140,6 +140,7 @@ export class HomeScreen implements Screen {
     append(this.hero, [
       artwork(item.title, item.artworkUrl, (path) => this.ctx.api.resolve(path), 'hero'),
       h('div', { class: 'hero__shade' }),
+      posterPanel(item.title, item.artworkUrl, (path) => this.ctx.api.resolve(path), 'hero__poster'),
       h(
         'div',
         { class: 'hero__content' },

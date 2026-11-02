@@ -89,7 +89,7 @@ export class SettingsScreen implements Screen {
         'section',
         { class: 'settings__section settings__about' },
         h('h2', {}, 'Sobre'),
-        h('p', {}, `HomeFlix ${__APP_VERSION__} · ${deviceDescription()}`),
+        h('p', {}, `MultiFlix ${__APP_VERSION__} · ${deviceDescription()}`),
       ),
     );
 

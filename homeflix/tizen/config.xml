@@ -4,7 +4,7 @@
     <tizen:profile name="tv-samsung"/>
     <content src="index.html"/>
     <icon src="icon.png"/>
-    <name>HomeFlix</name>
+    <name>MultiFlix</name>
     <description>Streaming pessoal dos vídeos do PC na rede local.</description>
     <author>HomeFlix</author>
     <feature name="http://tizen.org/feature/screen.size.normal.1080.1920"/>

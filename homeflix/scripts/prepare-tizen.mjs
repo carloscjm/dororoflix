@@ -7,7 +7,7 @@ const dist = `${root}dist/`;
 const { version } = JSON.parse(readFileSync(`${root}package.json`, 'utf8'));
 
 if (!existsSync(`${root}tizen/icon.png`)) {
-  console.error('tizen/icon.png não encontrado. Rode "npm run icons".');
+  console.error('tizen/icon.png não encontrado (ícone MultiFlix do app).');
   process.exit(1);
 }
 

@@ -66,9 +66,9 @@ function boot(): void {
     if (exitDialogOpen) return;
     exitDialogOpen = true;
     const choice = await showDialog(overlays, {
-      title: 'Sair do HomeFlix?',
+      title: 'Sair do MultiFlix?',
       actions: [
-        { value: 'stay', label: 'Continuar no HomeFlix', primary: true },
+        { value: 'stay', label: 'Continuar no MultiFlix', primary: true },
         { value: 'exit', label: 'Sair' },
       ],
     });

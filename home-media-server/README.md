@@ -10,7 +10,7 @@ Backend de uma plataforma pessoal de streaming (estilo Netflix) que disponibiliz
 - Página HTML de teste para navegar no catálogo e reproduzir no navegador.
 - **Séries e episódios** identificados por pastas e nomes (`S01E01`, `1x01`, `Temporada 1`…), com correções manuais opcionais.
 - **Legendas externas** (`.srt`/`.vtt`) associadas aos vídeos e entregues sempre em WebVTT UTF-8.
-- **Capas** já existentes nas pastas (`Filme.jpg`, `poster.jpg`…), sem inventar imagens.
+- **Capas** já existentes nas pastas (`Filme.jpg`, `poster.jpg` ou qualquer imagem na pasta de um único filme), sem inventar imagens.
 - Consumido pelo app **HomeFlix** para Samsung Tizen (pasta `../homeflix`).
 - Sem transcodificação nesta versão (veja [Limitações de codecs e contêineres](#limitações-de-codecs-e-contêineres)).
 
@@ -212,7 +212,7 @@ Filmes têm `"media": { "kind": "movie" }`. `artworkUrl` é `null` quando não h
 | `GET /api/series/:id/artwork` | Capa da série (`poster/capa/cover/folder.jpg` na pasta da série). |
 | `GET /api/videos/:id/subtitles` | Legendas associadas ao vídeo. |
 | `GET /api/videos/:id/subtitles/:subtitleId` | A legenda convertida para **WebVTT UTF-8** (`text/vtt`). 422 `SUBTITLE_INVALID` se o arquivo não tiver falas válidas; 413 acima de 5 MB. |
-| `GET /api/videos/:id/artwork` | Capa do vídeo, quando existe na pasta. |
+| `GET /api/videos/:id/artwork` | Capa do vídeo, quando existe na pasta: imagem com o mesmo nome do vídeo; ou, numa pasta com um único vídeo, `poster/capa/cover/folder` ou qualquer outra imagem (a maior). |
 
 **Como os episódios são identificados** (`src/library/media-classifier.ts`). Só vira episódio quando há evidência de temporada **e** episódio, e um nome de série. Na dúvida, o arquivo continua como filme avulso.
 

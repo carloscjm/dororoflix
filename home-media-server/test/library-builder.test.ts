@@ -156,6 +156,22 @@ describe('capas existentes', () => {
     expect(byPath(library, 'Pasta Unica/x.mkv').artwork).toEqual({ relativePath: 'Pasta Unica/folder.png', format: 'png' });
   });
 
+  it('usa qualquer imagem da pasta de um único filme (a maior, se houver várias)', () => {
+    const custom = buildLibrary('local', [
+      { relativePath: 'Home Alone/Home.Alone.1990.mkv', sizeBytes: 1000, modifiedAt: new Date(0) },
+      { relativePath: 'Home Alone/A1T+lZ6iUZL._AC_UF894,1000_QL80_.jpg', sizeBytes: 121_050, modifiedAt: new Date(0) },
+      { relativePath: 'Home Alone/thumb.jpg', sizeBytes: 3_000, modifiedAt: new Date(0) },
+      { relativePath: 'Mickey/4c55a1e6.png', sizeBytes: 47_340, modifiedAt: new Date(0) },
+      { relativePath: 'Mickey/Mickey.mkv', sizeBytes: 1000, modifiedAt: new Date(0) },
+      { relativePath: 'Raiz A.mkv', sizeBytes: 1000, modifiedAt: new Date(0) },
+      { relativePath: 'Raiz B.mkv', sizeBytes: 1000, modifiedAt: new Date(0) },
+      { relativePath: 'qualquer.jpg', sizeBytes: 9_999, modifiedAt: new Date(0) },
+    ]);
+    expect(byPath(custom, 'Home Alone/Home.Alone.1990.mkv').artwork?.relativePath).toBe('Home Alone/A1T+lZ6iUZL._AC_UF894,1000_QL80_.jpg');
+    expect(byPath(custom, 'Mickey/Mickey.mkv').artwork).toEqual({ relativePath: 'Mickey/4c55a1e6.png', format: 'png' });
+    expect(byPath(custom, 'Raiz A.mkv').artwork).toBeNull(); // pasta com vários vídeos: não adivinha
+  });
+
   it('usa o pôster da pasta da série', () => {
     expect(library.series[0]?.artwork).toEqual({ relativePath: 'Series/Show/poster.jpg', format: 'jpg' });
   });

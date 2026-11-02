@@ -1,6 +1,7 @@
 import type { CardItem, HomeSection } from '../models/library';
 import { h } from '../utils/dom';
 import { displayTitle, hashString } from '../utils/format';
+import logoUrl from '../assets/brand/logo.png';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -75,7 +76,7 @@ export function artwork(title: string, artworkUrl: string | null, resolve: (path
   const placeholder = h(
     'div',
     { class: `artwork__placeholder artwork__placeholder--${variant}` },
-    h('span', { class: 'artwork__mark' }, 'HOMEFLIX'),
+    h('span', { class: 'artwork__mark' }, 'MULTIFLIX'),
     h('span', { class: 'artwork__title' }, displayTitle(title)),
   );
   placeholder.style.backgroundImage = `linear-gradient(135deg, hsl(${hue}, 45%, 24%) 0%, hsl(${(hue + 40) % 360}, 55%, 12%) 70%, #0b0b0f 100%)`;
@@ -101,7 +102,7 @@ export function card(item: CardItem, resolve: (path: string) => string, onSelect
       'data-key': item.key,
       onclick: () => onSelect(item),
     },
-    artwork(item.title, item.artworkUrl, resolve),
+    artwork(item.title, item.artworkUrl, resolve, 'poster'),
     item.badge ? h('span', { class: 'card__badge' }, icon('check', 'icon icon--small'), item.badge) : null,
     progressBar(item.progress, 'card-progress'),
     h('div', { class: 'card__caption' }, h('div', { class: 'card__title' }, displayTitle(item.title)), h('div', { class: 'card__subtitle' }, item.subtitle)),
@@ -130,5 +131,10 @@ export function spinner(): HTMLElement {
 }
 
 export function brand(): HTMLElement {
-  return h('div', { class: 'brand' }, h('span', { class: 'brand__home' }, 'HOME'), h('span', { class: 'brand__flix' }, 'FLIX'));
+  return h('img', { class: 'brand', src: logoUrl, alt: 'MultiFlix', decoding: 'async' });
+}
+
+/** Pôster nítido (vertical) ao lado do texto, no banner e nos detalhes. Só quando há imagem real. */
+export function posterPanel(title: string, artworkUrl: string | null, resolve: (path: string) => string, className: string): HTMLElement | null {
+  return artworkUrl ? h('div', { class: className }, artwork(title, artworkUrl, resolve, 'poster')) : null;
 }

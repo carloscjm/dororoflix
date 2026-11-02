@@ -63,6 +63,11 @@ export function buildLibrary(
 
   const subtitlesByVideo = associateSubtitles(sourceId, subtitleFiles, videosByDir);
 
+  /**
+   * Capa que representa a pasta inteira: primeiro os nomes conhecidos (poster, capa...);
+   * senão, qualquer imagem da pasta (a maior, que costuma ser o pôster e não uma miniatura).
+   * Só deve ser usada quando a pasta pertence a um único filme ou a uma série.
+   */
   const folderArt = (dir: string | null): Artwork | null => {
     if (dir === null) return null;
     const images = imagesByDir.get(dir === '' ? '.' : dir) ?? [];
@@ -70,7 +75,8 @@ export function buildLibrary(
       const found = images.find((image) => lowerKey(baseOf(image.relativePath)) === wanted);
       if (found) return toArtwork(found);
     }
-    return null;
+    const largest = [...images].sort((a, b) => b.sizeBytes - a.sizeBytes || collator.compare(a.relativePath, b.relativePath))[0];
+    return largest ? toArtwork(largest) : null;
   };
 
   const videoArt = (video: DiscoveredFile): Artwork | null => {
@@ -81,7 +87,7 @@ export function buildLibrary(
       const found = images.find((image) => lowerKey(baseOf(image.relativePath)) === base + suffix);
       if (found) return toArtwork(found);
     }
-    // "poster.jpg" na pasta só vale para o vídeo quando ele é o único da pasta.
+    // Imagens da pasta (qualquer nome) só valem para o vídeo quando ele é o único da pasta.
     return (videosByDir.get(dir)?.length ?? 0) === 1 ? folderArt(dir) : null;
   };
 

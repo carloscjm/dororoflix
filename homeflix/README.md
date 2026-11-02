@@ -1,5 +1,7 @@
 # HomeFlix — app Samsung Smart TV (Tizen)
 
+> Na TV o app aparece como **MultiFlix** (logo e ícone em `src/assets/brand/` e `tizen/icon.png`). O nome interno do projeto e o ID do pacote (`HmFlxApp01.HomeFlix`) continuam os mesmos para preservar o histórico já salvo na TV.
+
 Plataforma pessoal de streaming, com interface inspirada na Netflix, para assistir na **Samsung Q60C** aos vídeos do PC servidos pelo [Home Media Server](../home-media-server).
 
 - Tela inicial com banner e fileiras: **Continuar assistindo**, **Filmes**, **Séries**, **Adicionados recentemente**.
@@ -75,7 +77,6 @@ No navegador, o player usa `<video>` HTML5. MKV com áudio AC-3/DTS costuma não
 | `npm run build` | Typecheck + bundle IIFE em `dist/` + `config.xml` e ícone (pronto para empacotar). |
 | `npm test` | Testes automatizados (Vitest + happy-dom). |
 | `npm run check` | Typecheck, testes e build. |
-| `npm run icons` | Regenera `tizen/icon.png` (512×423). |
 | `npm run package` | Build + `.wgt` assinado com o Tizen Studio CLI → `release/HomeFlix.wgt`. |
 | `npm run install:tv -- -TvIp <IP>` | Conecta via `sdb`, instala e abre o app na TV. |
 
@@ -201,7 +202,7 @@ Decisões principais:
 - **Foco declarativo:** grupos (`data-focus-group`) com orientação e vizinhos explícitos, em vez de cálculo geométrico. É previsível, testável e cada fileira lembra o último card.
 - **Telas empilhadas e ocultas** (não destruídas): voltar é instantâneo e restaura o foco pelo `data-key` do item.
 - **Motor de vídeo plugável** (`VideoEngine`): AVPlay na TV, `<video>` no navegador, motor falso nos testes.
-- **Capas:** só imagens que já existem nas pastas. Sem imagem, o placeholder é um gradiente com cor estável derivada do título. Nada de capas ou metadados inventados.
+- **Capas:** só imagens que já existem nas pastas, exibidas como pôster vertical (2:3) nos cards, no banner e nos detalhes. Sem imagem, o placeholder é um gradiente com cor estável derivada do título. Nada de capas ou metadados inventados.
 
 ## Testes
 
