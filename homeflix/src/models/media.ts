@@ -80,6 +80,36 @@ export interface ScanResult {
   readonly scannedAt: string;
 }
 
+/** Canal de TV ao vivo (lista IPTV configurada no servidor). */
+export interface Channel {
+  readonly id: string;
+  readonly name: string;
+  readonly group: string;
+  readonly logo: string | null;
+  readonly url: string;
+}
+
+export interface ChannelList {
+  readonly configured: boolean;
+  readonly total: number;
+  readonly loadedAt: string | null;
+  readonly errors: readonly string[];
+  readonly items: readonly Channel[];
+}
+
+export interface ChannelGroup {
+  readonly name: string;
+  readonly count: number;
+}
+
+export interface ChannelGroupList {
+  readonly configured: boolean;
+  readonly total: number;
+  readonly loadedAt: string | null;
+  readonly errors: readonly string[];
+  readonly items: readonly ChannelGroup[];
+}
+
 export function isEpisode(video: Video): video is Episode {
   return video.media.kind === 'episode';
 }

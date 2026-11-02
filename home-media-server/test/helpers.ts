@@ -61,6 +61,8 @@ export function testConfig(mediaRoot: string, overrides: Partial<AppConfig> = {}
     lanOnly: true,
     corsOrigins: [],
     metadataOverridesFile: null,
+    iptvSources: [],
+    iptvMaxListMb: 50,
     ...overrides,
   };
 }

@@ -157,6 +157,12 @@ Alternativa sem scripts: no Tizen Studio, *File › Import › Tizen › Tizen P
 - Arquivo inválido ou indisponível: aviso na tela, e a legenda é desativada sem interromper o vídeo.
 - Menu **Legendas** no player (ou a tecla amarela): desativar ou escolher a faixa. A escolha vira o idioma preferido, usado nos próximos vídeos.
 
+### TV ao vivo
+
+- Quando o servidor tem `IPTV_SOURCE` configurado, aparece a fileira **TV ao vivo** na tela inicial, com uma entrada por categoria da lista. OK abre a grade de canais.
+- No player ao vivo: **CH+/CH−** ou **▲/▼** trocam de canal dentro da categoria; **OK** mostra as informações; **Voltar** sai.
+- Sem histórico nem barra de progresso. Se um canal falhar, aparece "Canal indisponível" e você pode trocar de canal.
+
 ### Controle remoto
 
 | Tecla | Catálogo | Player (controles ocultos) | Player (controles visíveis) |

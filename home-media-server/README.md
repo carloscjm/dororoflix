@@ -241,6 +241,22 @@ Filmes têm `"media": { "kind": "movie" }`. `artworkUrl` é `null` quando não h
 }
 ```
 
+### TV ao vivo (IPTV)
+
+Configure no `.env` uma ou mais listas M3U, por URL ou arquivo, separadas por `|`, e reinicie o servidor:
+
+```env
+IPTV_SOURCE=E:\IPTV\canais.m3u|https://exemplo.com/lista.m3u
+```
+
+- `GET /api/iptv/channels` devolve `configured`, `total`, `loadedAt`, `errors` e `items` (`id`, `name`, `group`, `logo`, `url`).
+- A lista é lida de `#EXTINF` (`tvg-logo`, `group-title` ou `#EXTGRP`). Duplicados e protocolos que não sejam http(s) são ignorados.
+- O resultado fica em cache por 30 min. `POST /api/library/scan` recarrega as listas.
+- Tamanho máximo de cada lista: `IPTV_MAX_LIST_MB` (padrão 50, máximo 500). Listas muito grandes, com centenas de milhares de entradas, deixam o carregamento lento na TV; prefira uma lista só com os canais ao vivo.
+- Se uma lista falhar, o servidor mantém a última versão válida. Os logs não mostram usuário e senha da URL.
+- O vídeo **não passa pelo servidor**: a TV abre o stream direto (HLS/MPEG-TS via AVPlay). Streams com DRM ou que exigem cabeçalhos especiais não são suportados.
+- Use apenas listas legais (canais abertos ou serviços que você assina).
+
 ### Testando com `curl.exe` (já vem no Windows 10/11)
 
 ```powershell

@@ -24,6 +24,8 @@ describe('toRemoteKey — teclas do controle Samsung e do teclado', () => {
     expect(toRemoteKey({ keyCode: 417, key: 'MediaFastForward' })).toBe('fastForward');
     expect(toRemoteKey({ keyCode: 412, key: 'MediaRewind' })).toBe('rewind');
     expect(toRemoteKey({ keyCode: 13, key: 'Enter' })).toBe('enter');
+    expect(toRemoteKey({ keyCode: 427, key: 'XF86RaiseChannel' })).toBe('channelUp');
+    expect(toRemoteKey({ keyCode: 428, key: 'XF86LowerChannel' })).toBe('channelDown');
     expect(Object.values(TIZEN_KEY_CODES)).toContain('up');
   });
 

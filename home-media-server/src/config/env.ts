@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { z } from 'zod';
+import { parseIptvSources } from '../iptv/iptv.service.js';
 
 export const LOG_LEVELS = ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'] as const;
 export type LogLevel = (typeof LOG_LEVELS)[number];
@@ -20,6 +21,10 @@ export interface AppConfig {
   readonly corsOrigins: CorsOrigins;
   /** JSON opcional com correções manuais de metadados (séries/episódios). */
   readonly metadataOverridesFile: string | null;
+  /** Listas IPTV (URLs ou arquivos .m3u). Vazio = TV ao vivo desativada. */
+  readonly iptvSources: readonly string[];
+  /** Tamanho máximo de cada lista IPTV, em MB. */
+  readonly iptvMaxListMb: number;
 }
 
 const envSchema = z.object({
@@ -32,6 +37,8 @@ const envSchema = z.object({
   LAN_ONLY: z.stringbool().default(true),
   CORS_ORIGINS: z.string().default(''),
   METADATA_OVERRIDES_FILE: z.string().trim().min(1).optional(),
+  IPTV_SOURCE: z.string().optional(),
+  IPTV_MAX_LIST_MB: z.coerce.number().int().min(1).max(500).default(50),
 });
 
 export class ConfigError extends Error {
@@ -76,5 +83,7 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
     lanOnly: env.LAN_ONLY,
     corsOrigins: parseCorsOrigins(env.CORS_ORIGINS),
     metadataOverridesFile: env.METADATA_OVERRIDES_FILE ? path.resolve(env.METADATA_OVERRIDES_FILE) : null,
+    iptvSources: parseIptvSources(env.IPTV_SOURCE),
+    iptvMaxListMb: env.IPTV_MAX_LIST_MB,
   };
 }

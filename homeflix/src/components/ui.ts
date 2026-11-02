@@ -134,6 +134,25 @@ export function brand(): HTMLElement {
   return h('img', { class: 'brand', src: logoUrl, alt: 'MultiFlix', decoding: 'async' });
 }
 
+export type MainTab = 'library' | 'live';
+
+/**
+ * Menu superior: "Filmes e Séries" (catálogo do PC) e "Canais ao vivo" (IPTV,
+ * carregado só quando a aba é aberta), além de Configurações.
+ */
+export function mainNav(active: MainTab, actions: { library: () => void; live: () => void; settings: () => void }): HTMLElement {
+  const tab = (id: MainTab, label: string, onClick: () => void): HTMLElement =>
+    button(label, { key: `tab-${id}`, className: `tab${active === id ? ' tab--active' : ''}`, onClick });
+  return h(
+    'header',
+    { class: 'topbar', 'data-focus-group': 'nav', 'data-orientation': 'horizontal' },
+    brand(),
+    h('div', { class: 'tabs' }, tab('library', 'Filmes e Séries', actions.library), tab('live', 'Canais ao vivo', actions.live)),
+    h('div', { class: 'topbar__spacer' }),
+    button('Configurações', { icon: 'settings', key: 'settings', onClick: actions.settings }),
+  );
+}
+
 /** Pôster nítido (vertical) ao lado do texto, no banner e nos detalhes. Só quando há imagem real. */
 export function posterPanel(title: string, artworkUrl: string | null, resolve: (path: string) => string, className: string): HTMLElement | null {
   return artworkUrl ? h('div', { class: className }, artwork(title, artworkUrl, resolve, 'poster')) : null;

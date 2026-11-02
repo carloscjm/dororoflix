@@ -137,4 +137,19 @@ describe('buildHomeSections — integração com o catálogo', () => {
     expect(sections.map((section) => section.id)).toEqual(['movies', 'recent']);
     expect(sections[0]?.items[0]).toMatchObject({ badge: 'Assistido', progress: null });
   });
+
+  it('cria a fileira TV ao vivo com uma entrada por categoria', () => {
+    const { repo } = progressRepo();
+    const channel = (name: string, group: string) => ({ id: name, name, group, logo: null, url: `http://s/${name}.m3u8` });
+    const sections = buildHomeSections(
+      { videos: [movie('Filme')], series: [], channels: [channel('A', 'Notícias'), channel('B', 'Esportes'), channel('C', 'Notícias')] },
+      repo,
+    );
+    const live = sections.find((section) => section.id === 'live');
+    expect(live?.items.map((item) => [item.title, item.subtitle, item.target])).toEqual([
+      ['Notícias', '2 canais', { type: 'liveGroup', group: 'Notícias' }],
+      ['Esportes', '1 canal', { type: 'liveGroup', group: 'Esportes' }],
+    ]);
+    expect(buildHomeSections({ videos: [movie('X')], series: [] }, repo).some((section) => section.id === 'live')).toBe(false);
+  });
 });

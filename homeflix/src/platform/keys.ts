@@ -17,6 +17,8 @@ export type RemoteKey =
   | 'yellow'
   | 'blue'
   | 'info'
+  | 'channelUp'
+  | 'channelDown'
   | `digit${number}`;
 
 /** keyCodes do controle Samsung (Tizen TV) e dos teclados comuns. */
@@ -38,6 +40,8 @@ export const TIZEN_KEY_CODES: Readonly<Record<number, RemoteKey>> = {
   405: 'yellow', // ColorF2Yellow
   406: 'blue', // ColorF3Blue
   457: 'info', // Info
+  427: 'channelUp', // ChannelUp
+  428: 'channelDown', // ChannelDown
 };
 
 /** Teclas registradas via tizen.tvinputdevice (as setas, Enter e Voltar não precisam). */
@@ -53,6 +57,8 @@ export const TIZEN_REGISTERED_KEYS = [
   'ColorF2Yellow',
   'ColorF3Blue',
   'Info',
+  'ChannelUp',
+  'ChannelDown',
   '0',
   '1',
   '2',
@@ -83,6 +89,8 @@ export const BROWSER_KEYS: Readonly<Record<string, RemoteKey>> = {
   F3: 'yellow',
   F4: 'blue',
   i: 'info',
+  PageUp: 'channelUp',
+  PageDown: 'channelDown',
 };
 
 export interface KeyLike {

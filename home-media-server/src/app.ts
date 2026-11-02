@@ -2,6 +2,7 @@ import Fastify, { type FastifyInstance } from 'fastify';
 import type { AppConfig } from './config/env.js';
 import { buildLoggerOptions } from './config/logger.js';
 import { CatalogService } from './library/catalog.service.js';
+import { IptvService } from './iptv/iptv.service.js';
 import { loadOverridesFile } from './library/metadata-overrides.js';
 import { LocalFileSource } from './library/sources/local-source.js';
 import { PUBLIC_DIR } from './paths.js';
@@ -9,6 +10,7 @@ import { registerCors } from './plugins/cors.js';
 import { registerErrorHandlers } from './plugins/error-handler.js';
 import { registerLanGuard } from './plugins/lan-guard.js';
 import { healthRoutes } from './routes/health.routes.js';
+import { iptvRoutes } from './routes/iptv.routes.js';
 import { libraryRoutes } from './routes/library.routes.js';
 import { seriesRoutes } from './routes/series.routes.js';
 import { videosRoutes } from './routes/videos.routes.js';
@@ -40,15 +42,23 @@ export async function buildApp(config: AppConfig, options: BuildAppOptions = {})
     loadOverridesFile(config.metadataOverridesFile, (details, message) => app.log.warn(details, message)),
   );
   const streaming = new StreamingService(catalog);
+  const iptv = new IptvService(
+    config.iptvSources,
+    app.log.child({ module: 'iptv' }),
+    fetch,
+    config.iptvMaxListMb * 1024 * 1024,
+  );
 
   await app.register(healthRoutes, { catalog });
   await app.register(videosRoutes, { catalog, streaming });
   await app.register(seriesRoutes, { catalog });
-  await app.register(libraryRoutes, { catalog });
+  await app.register(libraryRoutes, { catalog, iptv });
+  await app.register(iptvRoutes, { iptv });
   await app.register(webRoutes, { publicDir: options.publicDir ?? PUBLIC_DIR });
 
   app.log.info({ mediaRoot: config.mediaRoot }, 'Lendo biblioteca de vídeos...');
   await catalog.scan();
+  void iptv.refresh(); // em segundo plano: uma lista lenta não atrasa a inicialização
 
   return app;
 }

@@ -1,5 +1,5 @@
 import type { ProgressRecord } from '../storage/progress-repository';
-import { isEpisode, type Episode, type SeriesSummary, type Video } from './media';
+import { isEpisode, type Channel, type Episode, type SeriesSummary, type Video } from './media';
 
 /**
  * Regras de catálogo puras (sem DOM nem rede): seções da tela inicial,
@@ -16,7 +16,8 @@ export interface ProgressView {
 export type CardTarget =
   | { readonly type: 'movie'; readonly videoId: string }
   | { readonly type: 'series'; readonly seriesId: string }
-  | { readonly type: 'resume'; readonly videoId: string; readonly seriesId: string | null };
+  | { readonly type: 'resume'; readonly videoId: string; readonly seriesId: string | null }
+  | { readonly type: 'liveGroup'; readonly group: string };
 
 export interface CardItem {
   readonly key: string;
@@ -31,7 +32,7 @@ export interface CardItem {
 }
 
 export interface HomeSection {
-  readonly id: 'continue' | 'movies' | 'series' | 'recent';
+  readonly id: 'continue' | 'live' | 'movies' | 'series' | 'recent';
   readonly title: string;
   readonly items: readonly CardItem[];
 }
@@ -39,6 +40,8 @@ export interface HomeSection {
 export interface Library {
   readonly videos: readonly Video[];
   readonly series: readonly SeriesSummary[];
+  /** Canais de TV ao vivo (vazio quando não há lista IPTV). */
+  readonly channels?: readonly Channel[];
 }
 
 const collator = new Intl.Collator('pt-BR', { sensitivity: 'base', numeric: true });
@@ -202,9 +205,34 @@ export function buildHomeSections(library: Library, progress: ProgressView, rece
 
   const sections: HomeSection[] = [
     { id: 'continue', title: 'Continuar assistindo', items: continueItems },
+    { id: 'live', title: 'TV ao vivo', items: liveGroupCards(library.channels ?? []) },
     { id: 'movies', title: 'Filmes', items: movies },
     { id: 'series', title: 'Séries', items: seriesCards },
     { id: 'recent', title: 'Adicionados recentemente', items: recent },
   ];
   return sections.filter((section) => section.items.length > 0);
+}
+
+/** Agrupa canais pela categoria da lista (group-title), na ordem em que aparecem. */
+export function channelGroups(channels: readonly Channel[]): Map<string, Channel[]> {
+  const groups = new Map<string, Channel[]>();
+  for (const channel of channels) {
+    const list = groups.get(channel.group);
+    if (list) list.push(channel);
+    else groups.set(channel.group, [channel]);
+  }
+  return groups;
+}
+
+function liveGroupCards(channels: readonly Channel[]): CardItem[] {
+  return [...channelGroups(channels)].map(([group, list]) => ({
+    key: `live:${group}`,
+    title: group,
+    subtitle: list.length === 1 ? '1 canal' : `${list.length} canais`,
+    artworkUrl: null,
+    progress: null,
+    badge: null,
+    target: { type: 'liveGroup', group },
+    addedAt: 0,
+  }));
 }

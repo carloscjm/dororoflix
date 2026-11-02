@@ -1,0 +1,11 @@
+{
+  "name": "multiflix-workspace",
+  "private": true,
+  "description": "Raiz do repositório: atalhos para validar os dois projetos (servidor e app de TV).",
+  "license": "UNLICENSED",
+  "scripts": {
+    "install:all": "npm --prefix home-media-server install && npm --prefix homeflix install",
+    "check": "npm --prefix home-media-server run check && npm --prefix homeflix run check",
+    "test": "npm --prefix home-media-server test && npm --prefix homeflix test"
+  }
+}

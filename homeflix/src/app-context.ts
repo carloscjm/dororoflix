@@ -1,6 +1,6 @@
 import type { MediaApi } from './api/media-api';
 import { episodesBySeries, type Library } from './models/library';
-import type { Episode, SeriesSummary, Video } from './models/media';
+import type { Channel, ChannelGroupList, Episode, SeriesSummary, Video } from './models/media';
 import type { FocusManager } from './navigation/focus-manager';
 import type { OverlayManager } from './navigation/overlays';
 import type { Router } from './navigation/router';
@@ -29,6 +29,8 @@ export class CatalogStore {
   private pending: Promise<Library> | null = null;
   private episodes = new Map<string, Episode[]>();
   private videosById = new Map<string, Video>();
+  private groups: Promise<ChannelGroupList> | null = null;
+  private readonly channelCache = new Map<string, Promise<Channel[]>>();
 
   constructor(private readonly api: MediaApi) {}
 
@@ -39,6 +41,8 @@ export class CatalogStore {
   load(force = false): Promise<Library> {
     if (this.library && !force) return Promise.resolve(this.library);
     if (!this.pending || force) {
+      // Os canais ao vivo NÃO são carregados aqui: a lista pode ser enorme e só é
+      // buscada quando o usuário abre a aba "Canais ao vivo".
       this.pending = Promise.all([this.api.listVideos(), this.api.listSeries()])
         .then(([videos, series]) => {
           const library: Library = { videos: videos.items, series: series.items };
@@ -60,6 +64,29 @@ export class CatalogStore {
 
   episodesOf(seriesId: string): Episode[] {
     return this.episodes.get(seriesId) ?? [];
+  }
+
+  /** Categorias da TV ao vivo (em cache; `force` recarrega). */
+  channelGroups(force = false): Promise<ChannelGroupList> {
+    if (!this.groups || force) {
+      this.groups = this.api.listChannelGroups();
+      this.channelCache.clear();
+      this.groups.catch(() => {
+        this.groups = null; // erro não fica em cache
+      });
+    }
+    return this.groups;
+  }
+
+  /** Canais de uma categoria (em cache). */
+  channelsOf(group: string): Promise<Channel[]> {
+    let pending = this.channelCache.get(group);
+    if (!pending) {
+      pending = this.api.listChannels(group).then((list) => [...list.items]);
+      pending.catch(() => this.channelCache.delete(group));
+      this.channelCache.set(group, pending);
+    }
+    return pending;
   }
 
   series(id: string): SeriesSummary | null {

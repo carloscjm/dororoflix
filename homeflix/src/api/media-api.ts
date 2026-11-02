@@ -1,4 +1,4 @@
-import type { Health, ScanResult, SeriesDetail, SeriesList, Video, VideoList } from '../models/media';
+import type { ChannelGroupList, ChannelList, Health, ScanResult, SeriesDetail, SeriesList, Video, VideoList } from '../models/media';
 
 export type ApiErrorKind = 'not-configured' | 'network' | 'timeout' | 'http' | 'invalid-response';
 
@@ -82,6 +82,16 @@ export class MediaApi {
 
   getSeries(id: string): Promise<SeriesDetail> {
     return this.json<SeriesDetail>(`/api/series/${encodeURIComponent(id)}`);
+  }
+
+  /** Categorias da lista IPTV (leve). Listas grandes podem demorar no primeiro carregamento do servidor. */
+  listChannelGroups(): Promise<ChannelGroupList> {
+    return this.json<ChannelGroupList>('/api/iptv/groups', { timeoutMs: 120_000 });
+  }
+
+  /** Canais de uma categoria. */
+  listChannels(group: string): Promise<ChannelList> {
+    return this.json<ChannelList>(`/api/iptv/channels?group=${encodeURIComponent(group)}`, { timeoutMs: 120_000 });
   }
 
   scanLibrary(): Promise<ScanResult> {

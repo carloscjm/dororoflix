@@ -40,3 +40,7 @@ distributor.p12
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Atalhos e imagens pessoais soltas
+*.lnk
+Imagem do ChatGPT*

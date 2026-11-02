@@ -1,11 +1,13 @@
 import { ApiError } from '../api/media-api';
 import type { AppContext } from '../app-context';
-import { artwork, brand, button, posterPanel, progressBar, row, spinner } from '../components/ui';
+import { artwork, button, mainNav, posterPanel, progressBar, row, spinner } from '../components/ui';
 import { buildHomeSections, type CardItem, type HomeSection } from '../models/library';
 import type { Screen } from '../navigation/router';
 import type { RemoteKey } from '../platform/keys';
 import { append, clear, h } from '../utils/dom';
 import { displayTitle, formatBytes, yearFromTitle } from '../utils/format';
+import { ChannelsScreen } from './channels-screen';
+import { LiveHomeScreen } from './live-home-screen';
 import { MovieScreen } from './movie-screen';
 import { playVideo } from './player-screen';
 import { SeriesScreen } from './series-screen';
@@ -24,13 +26,11 @@ export class HomeScreen implements Screen {
   private unsubscribe: (() => void) | null = null;
 
   constructor(private readonly ctx: AppContext) {
-    const nav = h(
-      'header',
-      { class: 'topbar', 'data-focus-group': 'nav', 'data-orientation': 'horizontal' },
-      brand(),
-      h('div', { class: 'topbar__spacer' }),
-      button('Configurações', { icon: 'settings', key: 'settings', onClick: () => void ctx.router.push(new SettingsScreen(ctx)) }),
-    );
+    const nav = mainNav('library', {
+      library: () => undefined,
+      live: () => void ctx.router.push(new LiveHomeScreen(ctx)),
+      settings: () => void ctx.router.push(new SettingsScreen(ctx)),
+    });
     this.root = h('div', { class: 'screen home' }, nav, this.hero, this.body);
   }
 
@@ -155,6 +155,7 @@ export class HomeScreen implements Screen {
 
   private heroDetails(item: CardItem): { kind: string; meta: string } {
     const target = item.target;
+    if (target.type === 'liveGroup') return { kind: 'TV ao vivo', meta: item.subtitle };
     if (target.type === 'series' || (target.type === 'resume' && target.seriesId)) {
       const seriesId = target.type === 'series' ? target.seriesId : (target.seriesId ?? '');
       const series = this.ctx.catalog.series(seriesId);
@@ -176,6 +177,8 @@ export class HomeScreen implements Screen {
       if (video) await this.ctx.router.push(new MovieScreen(this.ctx, video));
     } else if (target.type === 'series') {
       await this.ctx.router.push(new SeriesScreen(this.ctx, target.seriesId));
+    } else if (target.type === 'liveGroup') {
+      await this.ctx.router.push(new ChannelsScreen(this.ctx, target.group));
     } else {
       const video = this.ctx.catalog.video(target.videoId);
       if (video) await playVideo(this.ctx, video);
