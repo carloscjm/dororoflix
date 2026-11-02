@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets" id="http://homeflix.local/HomeFlix" version="__VERSION__" viewmodes="maximized">
+    <tizen:application id="HmFlxApp01.HomeFlix" package="HmFlxApp01" required_version="6.5"/>
+    <tizen:profile name="tv-samsung"/>
+    <content src="index.html"/>
+    <icon src="icon.png"/>
+    <name>HomeFlix</name>
+    <description>Streaming pessoal dos vídeos do PC na rede local.</description>
+    <author>HomeFlix</author>
+    <feature name="http://tizen.org/feature/screen.size.normal.1080.1920"/>
+
+    <!-- Acesso à rede: o app só conversa com o servidor da rede local (endereço configurável na TV). -->
+    <access origin="*" subdomains="true"/>
+    <tizen:allow-navigation>*</tizen:allow-navigation>
+
+    <tizen:privilege name="http://tizen.org/privilege/internet"/>
+    <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
+
+    <tizen:setting screen-orientation="landscape" context-menu="disable" background-support="disable" encryption="disable" install-location="auto" hwkey-event="enable"/>
+</widget>

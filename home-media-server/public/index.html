@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home Media Server — teste</title>
+  <style>
+    :root {
+      --bg: #0f0f10; --panel: #1a1a1c; --panel-hover: #242427; --text: #ececec;
+      --muted: #9a9aa0; --accent: #e50914; --ok: #46d369; --warn: #f5b041; --bad: #ff6b6b;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 system-ui, "Segoe UI", sans-serif; }
+    header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 16px 24px; border-bottom: 1px solid #222; }
+    h1 { font-size: 20px; margin: 0 auto 0 0; letter-spacing: .3px; }
+    h1 span { color: var(--accent); }
+    input, button { font: inherit; color: var(--text); background: var(--panel); border: 1px solid #333; border-radius: 6px; padding: 8px 12px; }
+    input { min-width: 240px; }
+    button { cursor: pointer; }
+    button:hover { background: var(--panel-hover); }
+    main { display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: 20px; padding: 20px 24px; }
+    @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+    #status { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+    #list { list-style: none; margin: 0; padding: 0; max-height: calc(100vh - 160px); overflow: auto; }
+    #list li { background: var(--panel); border-radius: 6px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; border-left: 3px solid transparent; }
+    #list li:hover { background: var(--panel-hover); }
+    #list li.active { border-left-color: var(--accent); }
+    .title { font-weight: 600; }
+    .meta { color: var(--muted); font-size: 12px; margin-top: 2px; word-break: break-all; }
+    .badge { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 4px; margin-right: 6px; background: #2c2c30; text-transform: uppercase; }
+    .play-yes { color: var(--ok); } .play-maybe { color: var(--warn); } .play-no { color: var(--bad); }
+    video { width: 100%; max-height: 70vh; background: #000; border-radius: 8px; }
+    #now { margin: 12px 0 4px; font-size: 18px; }
+    #hint { color: var(--muted); font-size: 13px; }
+    code { background: #222; padding: 1px 5px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><span>▶</span> Home Media Server</h1>
+    <input id="search" type="search" placeholder="Filtrar por título ou pasta…" aria-label="Filtrar vídeos">
+    <button id="rescan" type="button">Reescanear biblioteca</button>
+  </header>
+
+  <main>
+    <section aria-label="Catálogo">
+      <div id="status">Carregando catálogo…</div>
+      <ul id="list"></ul>
+    </section>
+
+    <section aria-label="Player">
+      <video id="player" controls preload="metadata"></video>
+      <div id="now">Selecione um vídeo</div>
+      <div id="hint">
+        A compatibilidade depende do navegador e dos codecs do arquivo (não há transcodificação).
+        MP4 (H.264/AAC) e WebM costumam funcionar; MKV e AVI frequentemente não.
+      </div>
+    </section>
+  </main>
+
+  <script>
+    'use strict';
+    const listEl = document.getElementById('list');
+    const statusEl = document.getElementById('status');
+    const searchEl = document.getElementById('search');
+    const player = document.getElementById('player');
+    const nowEl = document.getElementById('now');
+    const hintEl = document.getElementById('hint');
+    let videos = [];
+    let activeId = null;
+
+    const formatSize = (bytes) => {
+      const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+      let value = bytes, unit = 0;
+      while (value >= 1024 && unit < units.length - 1) { value /= 1024; unit++; }
+      return `${value.toFixed(unit === 0 ? 0 : 1)} ${units[unit]}`;
+    };
+
+    const playability = (mimeType) => {
+      const answer = player.canPlayType(mimeType);
+      if (answer === 'probably') return ['play-yes', 'provavelmente reproduz'];
+      if (answer === 'maybe') return ['play-maybe', 'talvez reproduza'];
+      return ['play-no', 'navegador não suporta o contêiner'];
+    };
+
+    function render() {
+      const term = searchEl.value.trim().toLocaleLowerCase('pt-BR');
+      const filtered = term
+        ? videos.filter((v) => `${v.title} ${v.relativePath}`.toLocaleLowerCase('pt-BR').includes(term))
+        : videos;
+
+      listEl.replaceChildren(...filtered.map((video) => {
+        const li = document.createElement('li');
+        li.className = video.id === activeId ? 'active' : '';
+        li.tabIndex = 0;
+
+        const title = document.createElement('div');
+        title.className = 'title';
+        title.textContent = video.title; // textContent evita injeção de HTML via nome de arquivo
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = video.format;
+        const [cls, label] = playability(video.mimeType);
+        const play = document.createElement('span');
+        play.className = cls;
+        play.textContent = label;
+        meta.append(badge, `${formatSize(video.sizeBytes)} · `, play);
+
+        const path = document.createElement('div');
+        path.className = 'meta';
+        path.textContent = video.relativePath;
+
+        li.append(title, meta, path);
+        const select = () => playVideo(video);
+        li.addEventListener('click', select);
+        li.addEventListener('keydown', (e) => { if (e.key === 'Enter') select(); });
+        return li;
+      }));
+
+      statusEl.textContent = `${filtered.length} de ${videos.length} vídeo(s)`;
+    }
+
+    function playVideo(video) {
+      activeId = video.id;
+      player.src = video.streamUrl;
+      nowEl.textContent = video.title;
+      hintEl.replaceChildren('Stream: ', Object.assign(document.createElement('code'), { textContent: video.streamUrl }),
+        ` · ${video.mimeType} · ${formatSize(video.sizeBytes)}`);
+      player.play().catch(() => { /* autoplay pode ser bloqueado; o usuário clica em play */ });
+      render();
+    }
+
+    player.addEventListener('error', () => {
+      if (!player.src) return;
+      hintEl.textContent = 'Não foi possível reproduzir este arquivo neste navegador ' +
+        '(contêiner ou codec de vídeo/áudio não suportado). Veja a seção de limitações no README.';
+    });
+
+    async function loadCatalog() {
+      statusEl.textContent = 'Carregando catálogo…';
+      try {
+        const response = await fetch('/api/videos');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const body = await response.json();
+        videos = body.items;
+        render();
+      } catch (error) {
+        statusEl.textContent = `Erro ao carregar catálogo: ${error.message}`;
+      }
+    }
+
+    document.getElementById('rescan').addEventListener('click', async (event) => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      try {
+        const response = await fetch('/api/library/scan', { method: 'POST' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        await loadCatalog();
+      } catch (error) {
+        statusEl.textContent = `Erro ao reescanear: ${error.message}`;
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    searchEl.addEventListener('input', render);
+    loadCatalog();
+  </script>
+</body>
+</html>

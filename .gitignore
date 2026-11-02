@@ -1,0 +1,42 @@
+# Dependências e builds
+node_modules/
+dist/
+release/
+coverage/
+*.log
+*.tsbuildinfo
+
+# Configuração local e dados sensíveis
+.env
+.env.local
+.env.*.local
+metadata-overrides.json
+.claude/
+
+# Pacotes e certificados Tizen/Samsung (nunca versionar)
+*.wgt
+*.p12
+*.pfx
+*.pem
+*.key
+*.cer
+*.crt
+author.p12
+distributor.p12
+.sign/
+.buildResult/
+
+# Mídia pessoal (proteção extra: a biblioteca fica fora do repositório)
+*.mkv
+*.mp4
+*.avi
+*.mov
+*.webm
+*.srt
+*.vtt
+*.zip
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini

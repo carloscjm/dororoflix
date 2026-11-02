@@ -1,0 +1,11 @@
+node_modules/
+dist/
+release/
+coverage/
+.env.local
+.env.*.local
+*.wgt
+*.p12
+*.pfx
+.buildResult/
+.sign/
