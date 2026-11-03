@@ -48,6 +48,7 @@ Episódios: `"media": { "kind": "episode", "seriesId", "seriesTitle", "season", 
 | `GET\|HEAD /api/videos/:id/stream` | Arquivo com HTTP Range: 200 (inteiro), 206 (`Content-Range`), 416 (fora do arquivo). `ETag`, `Last-Modified`, `If-Range`. 404 `FILE_MISSING` se o arquivo sumiu após o scan. |
 | `GET /api/videos/:id/subtitles` | `{ items: Subtitle[] }` |
 | `GET /api/videos/:id/subtitles/:subtitleId` | WebVTT UTF-8 (`text/vtt`). 404 `SUBTITLE_NOT_FOUND` (inclusive ID de outro vídeo), 422 `SUBTITLE_INVALID`, 413 `FILE_TOO_LARGE` (> 5 MB). |
+| `GET /api/videos/:id/probe` | Codecs de áudio lidos do início do arquivo (MKV): `{ audioCodecs: ["A_DTS",…], audioLabels: ["DTS",…], unsupported }`. `unsupported` = nenhuma faixa decodificável pela TV (DTS/TrueHD). Em cache por vídeo. |
 | `GET /api/videos/:id/artwork` | Imagem da capa (`Cache-Control: max-age=3600`). 404 `ARTWORK_NOT_FOUND`. |
 
 ## Séries

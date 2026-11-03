@@ -6,6 +6,7 @@ import type { Screen } from '../navigation/router';
 import type { RemoteKey } from '../platform/keys';
 import { append, clear, h } from '../utils/dom';
 import { displayTitle, formatBytes, yearFromTitle } from '../utils/format';
+import { AllTitlesScreen } from './all-titles-screen';
 import { ChannelsScreen } from './channels-screen';
 import { LiveHomeScreen } from './live-home-screen';
 import { MovieScreen } from './movie-screen';
@@ -156,6 +157,7 @@ export class HomeScreen implements Screen {
   private heroDetails(item: CardItem): { kind: string; meta: string } {
     const target = item.target;
     if (target.type === 'liveGroup') return { kind: 'TV ao vivo', meta: item.subtitle };
+    if (target.type === 'all') return { kind: target.kind === 'movies' ? 'Filmes' : 'Séries', meta: item.subtitle };
     if (target.type === 'series' || (target.type === 'resume' && target.seriesId)) {
       const seriesId = target.type === 'series' ? target.seriesId : (target.seriesId ?? '');
       const series = this.ctx.catalog.series(seriesId);
@@ -177,6 +179,8 @@ export class HomeScreen implements Screen {
       if (video) await this.ctx.router.push(new MovieScreen(this.ctx, video));
     } else if (target.type === 'series') {
       await this.ctx.router.push(new SeriesScreen(this.ctx, target.seriesId));
+    } else if (target.type === 'all') {
+      await this.ctx.router.push(new AllTitlesScreen(this.ctx, target.kind, (selected) => void this.open(selected)));
     } else if (target.type === 'liveGroup') {
       await this.ctx.router.push(new ChannelsScreen(this.ctx, target.group));
     } else {

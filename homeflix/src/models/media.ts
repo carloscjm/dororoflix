@@ -110,6 +110,13 @@ export interface ChannelGroupList {
   readonly items: readonly ChannelGroup[];
 }
 
+export interface AudioProbe {
+  readonly audioCodecs: readonly string[];
+  readonly audioLabels: readonly string[];
+  /** Nenhuma faixa de áudio é decodificável pela TV (o vídeo ficaria mudo). */
+  readonly unsupported: boolean;
+}
+
 export function isEpisode(video: Video): video is Episode {
   return video.media.kind === 'episode';
 }

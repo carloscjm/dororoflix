@@ -53,6 +53,10 @@ class FakeEngine implements VideoEngine {
   state(): EngineState {
     return this.current;
   }
+  audioTracks() {
+    return [];
+  }
+  selectAudioTrack(): void {}
   suspend(): void {
     this.suspended = true;
   }
@@ -245,6 +249,13 @@ function fakeAvplay(options: { prepareFails?: boolean; seekFails?: boolean } = {
     getCurrentTime: () => time,
     getDuration: () => 7_200_000,
     getState: () => state,
+    getTotalTrackInfo: () => [
+      { index: 0, type: 'VIDEO', extra_info: '{}' },
+      { index: 1, type: 'AUDIO', extra_info: '{"language":"por","fourCC":"ac3","channels":"6"}' },
+      { index: 2, type: 'AUDIO', extra_info: '{"language":"eng","fourCC":"aac","channels":"2"}' },
+    ],
+    getCurrentStreamInfo: () => [{ index: 2, type: 'AUDIO' }],
+    setSelectTrack: (type, index) => calls.push(`select ${type} ${index}`),
     suspend: () => calls.push('suspend'),
     restore: () => calls.push('restore'),
   };
@@ -312,6 +323,18 @@ describe('AvplayEngine (mock do AVPlay — validação real só na TV)', () => {
     expect(calls).toContain('restore');
     engine.destroy();
     expect(calls.slice(-2)).toEqual(['stop', 'close']);
+  });
+
+  it('lista e troca faixas de áudio (dual áudio)', async () => {
+    const { avplay, calls } = fakeAvplay();
+    const engine = new AvplayEngine(avplay);
+    await engine.load('u', 0);
+    expect(engine.audioTracks()).toEqual([
+      { index: 1, language: 'por', codec: 'ac3', channels: 6, active: false },
+      { index: 2, language: 'eng', codec: 'aac', channels: 2, active: true },
+    ]);
+    engine.selectAudioTrack(1);
+    expect(calls).toContain('select AUDIO 1');
   });
 
   it('classifica códigos de erro', () => {

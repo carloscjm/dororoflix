@@ -7,7 +7,7 @@ import type { Screen } from '../navigation/router';
 import type { RemoteKey } from '../platform/keys';
 import { setScreenSaver } from '../platform/tizen';
 import { PlaybackService } from '../player/playback-service';
-import type { EngineState, PlayerError } from '../player/video-engine';
+import type { AudioTrack, EngineState, PlayerError } from '../player/video-engine';
 import { SubtitleRenderer } from '../subtitles/subtitle-renderer';
 import { chooseSubtitle, preferenceFor, SubtitleService } from '../subtitles/subtitle-service';
 import { h } from '../utils/dom';
@@ -84,6 +84,8 @@ export class PlayerScreen implements Screen {
   private readonly timeTotal = h('span', { class: 'player__time player__time--total' }, '--:--');
   private readonly playButton: HTMLElement;
   private readonly subtitleButton: HTMLElement;
+  private readonly audioButton: HTMLElement;
+  private audioChecked = false;
 
   private playback: PlaybackService | null = null;
   private readonly renderer: SubtitleRenderer;
@@ -118,6 +120,7 @@ export class PlayerScreen implements Screen {
     );
     this.playButton = button('', { icon: 'pause', key: 'play', className: 'button--icon', onClick: () => this.togglePlay() });
     this.subtitleButton = button('Legendas', { icon: 'subtitles', key: 'subtitles', onClick: () => this.openSubtitleMenu() });
+    this.audioButton = button('Áudio', { icon: 'audio', key: 'audio', onClick: () => this.openAudioMenu() });
 
     const next = isEpisode(video) ? nextEpisode(this.episodes, video.id) : null;
     const previous = isEpisode(video) ? previousEpisode(this.episodes, video.id) : null;
@@ -127,6 +130,7 @@ export class PlayerScreen implements Screen {
       this.playButton,
       button('', { icon: 'forward', key: 'forward', className: 'button--icon', onClick: () => this.seekBy(SEEK_STEP) }),
       this.subtitleButton,
+      this.audioButton,
       this.episodes.length > 1 ? button('Episódios', { icon: 'episodes', key: 'episodes', onClick: () => this.openEpisodesMenu() }) : null,
       previous ? button('Anterior', { icon: 'rewind', key: 'previous', onClick: () => void this.switchTo(previous) }) : null,
       next ? button('Próximo episódio', { icon: 'next', key: 'next', onClick: () => void this.switchTo(next) }) : null,
@@ -307,6 +311,15 @@ export class PlayerScreen implements Screen {
     if (playIcon) playIcon.replaceWith(icon(state === 'playing' || state === 'buffering' ? 'pause' : 'play'));
     if (state === 'paused') this.showControls(true);
     else if (state === 'playing') this.scheduleHide();
+    if (state === 'playing' && !this.audioChecked) {
+      this.audioChecked = true;
+      // O AVPlay só lista faixas que a TV decodifica: nenhuma = arquivo mudo (ex.: áudio DTS).
+      window.setTimeout(() => {
+        if (this.playback?.engineKind === 'avplay' && this.playback.audioTracks().length === 0) {
+          this.ctx.toast('Este arquivo não tem áudio compatível com a TV (ex.: DTS). Converta o áudio de uma cópia para AC-3 ou AAC.');
+        }
+      }, 2000);
+    }
   }
 
   private async handleError(error: PlayerError): Promise<void> {
@@ -436,6 +449,47 @@ export class PlayerScreen implements Screen {
     if (label) label.textContent = this.activeSubtitle ? `Legenda: ${this.activeSubtitle.label}` : 'Legendas: desativadas';
   }
 
+  private openAudioMenu(): void {
+    if (this.menu) return;
+    const tracks = this.playback?.audioTracks() ?? [];
+    const items = tracks.map((track, position) =>
+      h(
+        'div',
+        {
+          class: `menu__item${track.active ? ' menu__item--selected' : ''}`,
+          'data-focusable': true,
+          'data-key': `audio-${track.index}`,
+          role: 'menuitemradio',
+          onclick: () => {
+            this.closeMenu();
+            this.playback?.selectAudioTrack(track.index);
+            this.ctx.toast(`Áudio: ${audioTrackLabel(track, position)}`);
+          },
+        },
+        icon('check', 'icon menu__check'),
+        h('span', {}, audioTrackLabel(track, position)),
+      ),
+    );
+    const selected = items[tracks.findIndex((track) => track.active)] ?? items[0] ?? null;
+    const panel = h(
+      'div',
+      { class: 'overlay overlay--side' },
+      h(
+        'div',
+        { class: 'menu' },
+        h('h2', { class: 'menu__title' }, 'Áudio'),
+        tracks.length === 0
+          ? h('p', { class: 'menu__empty' }, this.playback?.engineKind === 'avplay'
+              ? 'Nenhuma faixa de áudio compatível com a TV neste arquivo (ex.: DTS).'
+              : 'A troca de faixa de áudio só está disponível na TV.')
+          : null,
+        h('div', { class: 'menu__list', 'data-focus-group': 'audio-menu', 'data-orientation': 'vertical', 'data-scroll-y': 'nearest', 'data-scroll-pad': '24' }, items),
+      ),
+    );
+    this.menu = this.ctx.overlays.open(panel, { initialFocus: selected, onBack: () => this.closeMenu() });
+    this.showControls(true);
+  }
+
   private openSubtitleMenu(): void {
     if (this.menu) return;
     const options: (Subtitle | null)[] = [null, ...this.video.subtitles];
@@ -553,4 +607,18 @@ export function progressMeta(video: Video) {
   return isEpisode(video)
     ? { title: video.media.seriesTitle, seriesId: video.media.seriesId, season: video.media.season, episode: video.media.episode }
     : { title: video.title, seriesId: null, season: null, episode: null };
+}
+
+const LANGUAGE_NAMES: Readonly<Record<string, string>> = {
+  por: 'Português', pt: 'Português', 'pt-br': 'Português (Brasil)', pob: 'Português (Brasil)',
+  eng: 'Inglês', en: 'Inglês', spa: 'Espanhol', es: 'Espanhol', fra: 'Francês', fre: 'Francês', fr: 'Francês',
+  ita: 'Italiano', it: 'Italiano', deu: 'Alemão', ger: 'Alemão', de: 'Alemão', jpn: 'Japonês', ja: 'Japonês',
+};
+
+/** "Português · AC3 5.1" a partir das informações que o AVPlay expõe. */
+export function audioTrackLabel(track: AudioTrack, position: number): string {
+  const language = track.language ? (LANGUAGE_NAMES[track.language.toLowerCase()] ?? track.language.toUpperCase()) : `Faixa ${position + 1}`;
+  const codec = track.codec ? track.codec.replace(/^audio\//, '').toUpperCase() : null;
+  const channels = track.channels === 6 ? '5.1' : track.channels === 8 ? '7.1' : track.channels === 2 ? 'estéreo' : null;
+  return [language, [codec, channels].filter(Boolean).join(' ')].filter((part) => part !== '').join(' · ');
 }

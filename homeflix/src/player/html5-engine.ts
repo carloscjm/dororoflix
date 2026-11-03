@@ -1,4 +1,4 @@
-import { NOOP_LISTENER, PlayerError, type EngineListener, type EngineState, type VideoEngine } from './video-engine';
+import { NOOP_LISTENER, PlayerError, type AudioTrack, type EngineListener, type EngineState, type VideoEngine } from './video-engine';
 
 /** Motor com <video> HTML5: usado no navegador para desenvolver e testar a interface. */
 export class Html5Engine implements VideoEngine {
@@ -83,6 +83,12 @@ export class Html5Engine implements VideoEngine {
   state(): EngineState {
     return this.currentState;
   }
+
+  audioTracks(): AudioTrack[] {
+    return []; // o <video> do navegador não expõe faixas de forma confiável
+  }
+
+  selectAudioTrack(): void {}
 
   suspend(): void {
     this.pause();

@@ -91,6 +91,7 @@ Abra `chrome://inspect` no Chrome do PC (alvo `localhost:9222`) ou use o protoco
 | Conecta no navegador mas não na TV | `CORS_ORIGINS` sem `null,file://`. |
 | Áudio e legenda sem imagem | Página não transparente durante o AVPlay (ver invariantes em `AGENTS.md`). |
 | Ícone no centro do vídeo | `<object>` do AVPlay visível (deve ter `opacity: 0`). |
+| Filme toca sem som | Áudio DTS ou TrueHD, que a TV não decodifica (a tela do filme avisa). Gere uma **cópia** com o áudio em AC-3 fora de `E:\Filmes` e depois substitua: `ffmpeg -i entrada.mkv -map 0 -c:v copy -c:s copy -c:a ac3 -b:a 640k saida.mkv`. Ou prefira versões com áudio AC-3/E-AC-3 (DD/DDP). |
 | Série não aparece | Pasta fora de `MEDIA_ROOT` ou sem número de temporada/episódio no nome. |
 | Episódio aparece como filme | Falta `S01E01` no nome ou pasta `Temporada N`; ou use `METADATA_OVERRIDES_FILE`. |
 | "Canais ao vivo não configurados" | `IPTV_SOURCE` vazio no `.env`. |

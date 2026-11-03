@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildHomeSections, episodesBySeries, nextEpisode, previousEpisode, resolveContinuation } from '../src/models/library';
+import { allTitles, buildHomeSections, episodesBySeries, nextEpisode, previousEpisode, resolveContinuation } from '../src/models/library';
 import type { Episode } from '../src/models/media';
 import { episode, movie, progressRepo, seriesSummary } from './fixtures';
 
@@ -151,5 +151,15 @@ describe('buildHomeSections — integração com o catálogo', () => {
       ['Esportes', '1 canal', { type: 'liveGroup', group: 'Esportes' }],
     ]);
     expect(buildHomeSections({ videos: [movie('X')], series: [] }, repo).some((section) => section.id === 'live')).toBe(false);
+  });
+
+  it('limita fileiras grandes e oferece "Ver todos" com a lista completa', () => {
+    const { repo } = progressRepo();
+    const videos = Array.from({ length: 5 }, (_, index) => movie(`Filme ${index + 1}`));
+    const sections = buildHomeSections({ videos, series: [] }, repo, 20, 3);
+    const movies = sections.find((section) => section.id === 'movies');
+    expect(movies?.items.map((item) => item.title)).toEqual(['Filme 1', 'Filme 2', 'Filme 3', 'Ver todos os filmes']);
+    expect(movies?.items[3]).toMatchObject({ subtitle: '5 filmes', target: { type: 'all', kind: 'movies' } });
+    expect(allTitles({ videos, series: [] }, repo, 'movies')).toHaveLength(5);
   });
 });

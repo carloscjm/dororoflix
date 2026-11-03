@@ -1,6 +1,6 @@
 import type { AppContext } from '../app-context';
 import { artwork, button, posterPanel, progressBar } from '../components/ui';
-import type { Video } from '../models/media';
+import type { AudioProbe, Video } from '../models/media';
 import type { Screen } from '../navigation/router';
 import { append, clear, h } from '../utils/dom';
 import { displayTitle, formatBytes, formatDuration, formatTime, yearFromTitle } from '../utils/format';
@@ -26,7 +26,17 @@ export class MovieScreen implements Screen {
     );
   }
 
+  private probe: AudioProbe | null = null;
+
   mount(): void {
+    // Detecta áudio incompatível (ex.: DTS) sem atrasar a abertura da tela.
+    void this.ctx.api.probe(this.video.id).then(
+      (probe) => {
+        this.probe = probe;
+        if (probe.unsupported && this.root.isConnected) this.render();
+      },
+      () => undefined,
+    );
     this.render();
     this.ctx.focus.focusFirst('movie-actions');
   }
@@ -105,6 +115,13 @@ export class MovieScreen implements Screen {
       h('div', { class: 'details__meta' }, [year ? String(year) : null, video.format.toUpperCase(), formatBytes(video.sizeBytes)].filter(Boolean).join(' · ')),
       inProgress ? progressBar(progress.fraction(record), 'details-progress') : null,
       status ? h('div', { class: 'details__status' }, status) : null,
+      this.probe?.unsupported
+        ? h(
+            'div',
+            { class: 'details__warning' },
+            `Áudio ${[...new Set(this.probe.audioLabels)].join(' / ')} não é suportado por esta TV: o filme vai tocar sem som. Converta o áudio de uma cópia para AC-3 ou AAC.`,
+          )
+        : null,
       actions,
       h('dl', { class: 'details__facts' }, facts.flatMap(([term, value]) => [h('dt', {}, term), h('dd', {}, value)])),
     ]);

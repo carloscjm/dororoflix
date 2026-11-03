@@ -39,11 +39,22 @@ export interface VideoEngine {
   /** Duração em segundos, ou null enquanto desconhecida. */
   duration(): number | null;
   state(): EngineState;
+  /** Faixas de áudio que o decodificador da TV reconhece (vazio = nenhuma compatível ou não suportado). */
+  audioTracks(): AudioTrack[];
+  selectAudioTrack(index: number): void;
   /** App foi para segundo plano (Home, troca de entrada, etc.). */
   suspend(): void;
   /** App voltou ao primeiro plano. */
   restore(): void;
   destroy(): void;
+}
+
+export interface AudioTrack {
+  readonly index: number;
+  readonly language: string | null;
+  readonly codec: string | null;
+  readonly channels: number | null;
+  readonly active: boolean;
 }
 
 export const NOOP_LISTENER: EngineListener = {

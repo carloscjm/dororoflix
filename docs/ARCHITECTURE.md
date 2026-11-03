@@ -90,6 +90,16 @@ Sem vizinho explícito, ▲/▼ seguem a ordem dos grupos no DOM. Cada grupo lem
 - `PlayerScreen`: controles que somem, seek acumulado (um único `seekTo` após 600 ms), menu de legendas/episódios, próximo episódio com contagem de 15 s.
 - `LivePlayerScreen`: canais ao vivo; CH+/CH− ou ▲/▼ trocam de canal; sem histórico.
 
+### Desempenho com bibliotecas grandes
+
+- Capas dos cards são carregadas sob demanda (`img[data-src]` + `IntersectionObserver` em `observeLazyImages`): só as que estão perto da área visível de cada fileira ou grade.
+- Fileiras "Filmes" e "Séries" mostram no máximo `ROW_LIMIT` (30) cards + um card **"Ver todos"**, que abre `AllTitlesScreen` (grade completa, também com carregamento sob demanda).
+- Canais IPTV só na aba "Canais ao vivo", por categoria.
+
+### Áudio
+
+O AVPlay só lista faixas que a TV decodifica. O menu **Áudio** do player usa `getTotalTrackInfo`/`setSelectTrack` (filmes dual áudio). Sem nenhuma faixa compatível (ex.: DTS), o player avisa, e a tela de detalhes também (via `GET /api/videos/:id/probe`).
+
 ### Legendas
 
 Servidor converte para WebVTT UTF-8 → `SubtitleService` baixa e interpreta (`parseVtt`) → `SubtitleRenderer` desenha sobre o vídeo, atualizado a cada 250 ms e após cada busca (busca binária nas falas). Só `<i>`, `<b>`, `<u>` e quebras de linha são renderizados.

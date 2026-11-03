@@ -1,5 +1,5 @@
 import type { ProgressMeta, ProgressRecord, ProgressRepository } from '../storage/progress-repository';
-import type { EngineListener, EngineState, PlayerError, VideoEngine } from './video-engine';
+import type { AudioTrack, EngineListener, EngineState, PlayerError, VideoEngine } from './video-engine';
 
 export interface Scheduler {
   setInterval(handler: () => void, ms: number): number;
@@ -111,6 +111,14 @@ export class PlaybackService {
     this.started = true;
     this.save('seek');
     return target;
+  }
+
+  audioTracks(): AudioTrack[] {
+    return this.engine.audioTracks();
+  }
+
+  selectAudioTrack(index: number): void {
+    this.engine.selectAudioTrack(index);
   }
 
   position(): number {

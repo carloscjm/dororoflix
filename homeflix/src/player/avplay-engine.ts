@@ -1,4 +1,4 @@
-import { NOOP_LISTENER, PlayerError, type EngineListener, type EngineState, type VideoEngine } from './video-engine';
+import { NOOP_LISTENER, PlayerError, type AudioTrack, type EngineListener, type EngineState, type VideoEngine } from './video-engine';
 
 /**
  * Motor baseado no Samsung AVPlay.
@@ -124,6 +124,36 @@ export class AvplayEngine implements VideoEngine {
     return this.currentState;
   }
 
+  audioTracks(): AudioTrack[] {
+    try {
+      const active = (this.avplay.getCurrentStreamInfo?.() ?? []).find((track) => track.type === 'AUDIO')?.index;
+      return this.avplay
+        .getTotalTrackInfo()
+        .filter((track) => track.type === 'AUDIO')
+        .map((track) => {
+          const info = parseExtraInfo(track.extra_info);
+          const channels = Number(info['channels']);
+          return {
+            index: track.index,
+            language: typeof info['language'] === 'string' && info['language'] !== '' ? info['language'] : null,
+            codec: typeof info['fourCC'] === 'string' && info['fourCC'] !== '' ? info['fourCC'] : null,
+            channels: Number.isFinite(channels) && channels > 0 ? channels : null,
+            active: track.index === active,
+          };
+        });
+    } catch {
+      return [];
+    }
+  }
+
+  selectAudioTrack(index: number): void {
+    try {
+      this.avplay.setSelectTrack?.('AUDIO', index);
+    } catch (error) {
+      this.listener.onError(toPlayerError(error, 'audio'));
+    }
+  }
+
   suspend(): void {
     this.wasPlayingBeforeSuspend = this.currentState === 'playing';
     try {
@@ -236,5 +266,15 @@ export function errorFromEvent(eventType: string): PlayerError {
     case 'PLAYER_ERROR_INVALID_OPERATION':
     default:
       return new PlayerError('decode', 'Ocorreu um erro durante a reprodução.', eventType);
+  }
+}
+
+function parseExtraInfo(raw: string | undefined): Record<string, unknown> {
+  if (!raw) return {};
+  try {
+    const value: unknown = JSON.parse(raw);
+    return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+  } catch {
+    return {};
   }
 }

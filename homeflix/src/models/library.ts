@@ -17,7 +17,8 @@ export type CardTarget =
   | { readonly type: 'movie'; readonly videoId: string }
   | { readonly type: 'series'; readonly seriesId: string }
   | { readonly type: 'resume'; readonly videoId: string; readonly seriesId: string | null }
-  | { readonly type: 'liveGroup'; readonly group: string };
+  | { readonly type: 'liveGroup'; readonly group: string }
+  | { readonly type: 'all'; readonly kind: 'movies' | 'series' };
 
 export interface CardItem {
   readonly key: string;
@@ -43,6 +44,9 @@ export interface Library {
   /** Canais de TV ao vivo (vazio quando não há lista IPTV). */
   readonly channels?: readonly Channel[];
 }
+
+/** Máximo de cards por fileira na tela inicial; o resto fica em "Ver todos". */
+export const ROW_LIMIT = 30;
 
 const collator = new Intl.Collator('pt-BR', { sensitivity: 'base', numeric: true });
 
@@ -148,7 +152,7 @@ function seriesCard(series: SeriesSummary): CardItem {
 }
 
 /** Monta as seções da tela inicial. */
-export function buildHomeSections(library: Library, progress: ProgressView, recentLimit = 20): HomeSection[] {
+export function buildHomeSections(library: Library, progress: ProgressView, recentLimit = 20, rowLimit = ROW_LIMIT): HomeSection[] {
   const videosById = new Map(library.videos.map((video) => [video.id, video]));
   const seriesById = new Map(library.series.map((series) => [series.id, series]));
   const episodes = episodesBySeries(library.videos);
@@ -206,8 +210,8 @@ export function buildHomeSections(library: Library, progress: ProgressView, rece
   const sections: HomeSection[] = [
     { id: 'continue', title: 'Continuar assistindo', items: continueItems },
     { id: 'live', title: 'TV ao vivo', items: liveGroupCards(library.channels ?? []) },
-    { id: 'movies', title: 'Filmes', items: movies },
-    { id: 'series', title: 'Séries', items: seriesCards },
+    { id: 'movies', title: 'Filmes', items: capRow(movies, 'movies', rowLimit) },
+    { id: 'series', title: 'Séries', items: capRow(seriesCards, 'series', rowLimit) },
     { id: 'recent', title: 'Adicionados recentemente', items: recent },
   ];
   return sections.filter((section) => section.items.length > 0);
@@ -235,4 +239,32 @@ function liveGroupCards(channels: readonly Channel[]): CardItem[] {
     target: { type: 'liveGroup', group },
     addedAt: 0,
   }));
+}
+
+/** Fileira com no máximo `limit` itens + card "Ver todos" quando há mais. */
+function capRow(items: CardItem[], kind: 'movies' | 'series', limit: number): CardItem[] {
+  if (items.length <= limit) return items;
+  const label = kind === 'movies' ? 'filmes' : 'séries';
+  return [
+    ...items.slice(0, limit),
+    {
+      key: `all:${kind}`,
+      title: `Ver todos os ${label}`,
+      subtitle: `${items.length} ${label}`,
+      artworkUrl: null,
+      progress: null,
+      badge: null,
+      target: { type: 'all', kind },
+      addedAt: 0,
+    },
+  ];
+}
+
+/** Todos os filmes ou séries (para a grade "Ver todos"), em ordem alfabética. */
+export function allTitles(library: Library, progress: ProgressView, kind: 'movies' | 'series'): CardItem[] {
+  if (kind === 'series') return library.series.map(seriesCard).sort((a, b) => collator.compare(a.title, b.title));
+  return library.videos
+    .filter((video) => !isEpisode(video))
+    .map((video) => movieCard(video, progress))
+    .sort((a, b) => collator.compare(a.title, b.title));
 }

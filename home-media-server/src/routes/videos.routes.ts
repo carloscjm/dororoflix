@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { artworkNotFound, errorBody, subtitleNotFound, videoNotFound } from '../errors/app-error.js';
 import type { CatalogService } from '../library/catalog.service.js';
+import { audioCodecLabel, PROBE_BYTES, probeAudioCodecs, type AudioProbe } from '../library/media-probe.js';
 import type { VideoItem } from '../library/types.js';
 import type { StreamingService } from '../streaming/streaming.service.js';
 import { sendArtwork, sendSubtitle } from './media-files.js';
@@ -102,6 +103,42 @@ export const videosRoutes: FastifyPluginAsync<VideosRoutesOptions> = async (app,
       const track = video.subtitles.find((item) => item.id === request.params.subtitleId);
       if (!track) throw subtitleNotFound(request.params.subtitleId);
       return sendSubtitle(reply, catalog, video.sourceId, track);
+    },
+  );
+
+  // Codecs de áudio (lidos do início do arquivo, em cache por vídeo/data de modificação).
+  const probeCache = new Map<string, AudioProbe>();
+  app.get<{ Params: VideoIdParams }>(
+    '/api/videos/:id/probe',
+    {
+      schema: {
+        params: videoIdParamsSchema,
+        response: {
+          200: {
+            type: 'object',
+            required: ['audioCodecs', 'audioLabels', 'unsupported'],
+            properties: {
+              audioCodecs: { type: 'array', items: { type: 'string' } },
+              audioLabels: { type: 'array', items: { type: 'string' } },
+              unsupported: { type: 'boolean' },
+            },
+          },
+          '4xx': errorSchema,
+        },
+      },
+    },
+    async (request) => {
+      const video = findOrThrow(request.params.id);
+      const key = `${video.id}:${video.modifiedAt.getTime()}`;
+      let probe = probeCache.get(key);
+      if (!probe) {
+        const stream = await streaming.open(video, { start: 0, end: Math.max(0, Math.min(video.sizeBytes, PROBE_BYTES) - 1) });
+        const chunks: Buffer[] = [];
+        for await (const chunk of stream) chunks.push(chunk as Buffer);
+        probe = probeAudioCodecs(Buffer.concat(chunks));
+        probeCache.set(key, probe);
+      }
+      return { ...probe, audioLabels: probe.audioCodecs.map(audioCodecLabel) };
     },
   );
 

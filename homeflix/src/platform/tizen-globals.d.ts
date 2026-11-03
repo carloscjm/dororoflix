@@ -14,6 +14,12 @@ interface AVPlayListener {
   onsubtitlechange?: (duration: number, text: string, dataSize: number, jsonString: string) => void;
 }
 
+interface AVPlayTrackInfo {
+  index: number;
+  type: 'VIDEO' | 'AUDIO' | 'TEXT' | string;
+  extra_info?: string;
+}
+
 type AVPlayState = 'NONE' | 'IDLE' | 'READY' | 'PLAYING' | 'PAUSED';
 
 interface AVPlayManager {
@@ -30,6 +36,9 @@ interface AVPlayManager {
   getCurrentTime(): number;
   getDuration(): number;
   getState(): AVPlayState;
+  getTotalTrackInfo(): AVPlayTrackInfo[];
+  getCurrentStreamInfo?(): AVPlayTrackInfo[];
+  setSelectTrack?(type: 'AUDIO' | 'TEXT' | 'VIDEO', index: number): void;
   suspend(): void;
   restore(url?: string, resumeTimeMs?: number, prepare?: boolean): void;
   setTimeoutForBuffering?(seconds: number): void;

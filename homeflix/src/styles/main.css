@@ -1461,3 +1461,36 @@ html.is-playing .screens {
   transform: scale(1.06);
   box-shadow: 0 0 0 5px var(--focus-ring);
 }
+
+.details__warning {
+  max-width: 1000px;
+  margin-top: 22px;
+  padding: 18px 24px;
+  border-radius: 10px;
+  border-left: 6px solid var(--brand-2);
+  background: rgba(255, 154, 60, 0.12);
+  font-size: 26px;
+  line-height: 1.35;
+}
+
+/* ---------- Ver todos ---------- */
+
+.all-titles__scroll {
+  position: absolute;
+  top: 120px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  scroll-behavior: smooth;
+}
+
+.all-titles__grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 30px var(--gutter) 300px calc(var(--gutter) + 20px);
+}
+
+.all-titles__grid .card {
+  margin: 0 44px 36px 0;
+}

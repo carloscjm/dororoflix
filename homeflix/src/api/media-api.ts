@@ -1,4 +1,4 @@
-import type { ChannelGroupList, ChannelList, Health, ScanResult, SeriesDetail, SeriesList, Video, VideoList } from '../models/media';
+import type { AudioProbe, ChannelGroupList, ChannelList, Health, ScanResult, SeriesDetail, SeriesList, Video, VideoList } from '../models/media';
 
 export type ApiErrorKind = 'not-configured' | 'network' | 'timeout' | 'http' | 'invalid-response';
 
@@ -99,6 +99,11 @@ export class MediaApi {
   }
 
   /** Texto WebVTT de uma legenda (o servidor converte SRT e corrige a codificação). */
+  /** Codecs de áudio do arquivo (para avisar quando a TV não decodifica, ex.: DTS). */
+  probe(id: string): Promise<AudioProbe> {
+    return this.json<AudioProbe>(`/api/videos/${encodeURIComponent(id)}/probe`, { timeoutMs: 15_000 });
+  }
+
   subtitleText(url: string): Promise<string> {
     return this.request(url, {}).then((response) => response.text());
   }
