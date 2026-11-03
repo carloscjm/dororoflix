@@ -17,5 +17,5 @@ Registro curto das decisões que não são óbvias pelo código. Ao tomar uma de
 | 11 | Salvamento **periódico** (10 s) além de eventos | A TV pode ser desligada sem evento de encerramento | Perde no máximo cerca de 10 s |
 | 12 | IPTV: servidor lê a lista; **TV toca o stream direto** | Não sobrecarregar o PC nem a LAN | Streams com cabeçalhos especiais ou DRM não tocam |
 | 13 | IPTV entregue **por categoria**, aba separada | Listas com dezenas de MB travavam a abertura do app | A tela inicial nunca carrega canais |
-| 14 | Nome exibido "MultiFlix", ID do pacote mantido | Trocar o ID instalaria outro app e apagaria o histórico | Nome interno do projeto continua `homeflix` |
+| 14 | Nome exibido "GatoFlix", ID do pacote mantido | Trocar o ID instalaria outro app e apagaria o histórico | Nome interno do projeto continua `homeflix` |
 | 15 | `AGENTS.md` como fonte única para agentes de IA | Padrão aberto lido por várias ferramentas | `CLAUDE.md`, `GEMINI.md`, `.cursorrules`, Copilot só apontam para ele |

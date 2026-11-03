@@ -111,6 +111,31 @@ describe('associação de legendas', () => {
   });
 });
 
+describe('legendas de outro release (pasta Legenda com uma legenda por episódio)', () => {
+  const folder = 'Series/Ted.Lasso.S04.1080p.ATVP.WEB-DL.DDP5.1.Atmos.H.264.DUAL-BiOMA';
+  const library = buildLibrary(
+    'local',
+    files(
+      `${folder}/Ted.Lasso.S04E01.1080p.ATVP.WEB-DL.DDP5.1.Atmos.H.264.DUAL-BiOMA.mkv`,
+      `${folder}/Ted.Lasso.S04E02.1080p.ATVP.WEB-DL.DDP5.1.Atmos.H.264.DUAL-BiOMA.mkv`,
+      `${folder}/Legenda/Ted.Lasso.S04E01.Home.1080p.WEBRip.10Bit.DDP5.1.x265-NeoNoir.srt`,
+      `${folder}/Legenda/Ted.Lasso.S04E02.Make.It.Right.1080p.WEBRip.x265-NeoNoir.pt-BR.srt`,
+      `${folder}/Legenda/Ted.Lasso.S04E09.Sem.Video.srt`,
+    ),
+  );
+
+  it('associa pelo código do episódio e só lê idioma do fim do nome', () => {
+    expect(byPath(library, `${folder}/Ted.Lasso.S04E01.1080p.ATVP.WEB-DL.DDP5.1.Atmos.H.264.DUAL-BiOMA.mkv`).subtitles).toMatchObject([
+      { language: null, label: 'Legenda', relativePath: `${folder}/Legenda/Ted.Lasso.S04E01.Home.1080p.WEBRip.10Bit.DDP5.1.x265-NeoNoir.srt` },
+    ]);
+    expect(byPath(library, `${folder}/Ted.Lasso.S04E02.1080p.ATVP.WEB-DL.DDP5.1.Atmos.H.264.DUAL-BiOMA.mkv`).subtitles).toMatchObject([
+      { language: 'pt-BR' }, // "It" do título não vira italiano
+    ]);
+    const all = library.videos.flatMap((video) => video.subtitles.map((track) => track.relativePath));
+    expect(all.some((item) => item.includes('S04E09'))).toBe(false); // sem vídeo correspondente
+  });
+});
+
 describe('parseSubtitleSuffix', () => {
   it.each([
     ['.pt-BR', 'pt-BR'],

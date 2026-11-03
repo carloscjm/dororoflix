@@ -205,3 +205,9 @@ export function classifyVideoPath(relativePath: string): Classification {
     seriesFolder,
   };
 }
+
+/** "S04E01"/"4x01" no nome → "4:1" (temporada:episódio); null sem código explícito. */
+export function episodeCodeOf(baseName: string): string | null {
+  const match = SEASON_EPISODE.exec(baseName) ?? CROSS_NOTATION.exec(baseName);
+  return match?.[1] !== undefined && match[2] !== undefined ? `${Number(match[1])}:${Number(match[2])}` : null;
+}

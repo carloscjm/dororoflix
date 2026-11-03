@@ -225,7 +225,9 @@ Filmes têm `"media": { "kind": "movie" }`. `artworkUrl` é `null` quando não h
 
 - Mesmo nome do vídeo + sufixo de idioma: `Filme.mkv` ↔ `Filme.srt`, `Filme.pt-BR.srt`, `Filme.en.forced.srt`.
 - Também em subpastas `Legenda`, `Legendas`, `Sub`, `Subs`, `Subtitles` ao lado do vídeo.
-- Numa pasta com **um único vídeo**, legendas com outro nome (ex.: `Portuguese.srt`) também são associadas. Com vários vídeos, nada é adivinhado.
+- Numa pasta com **um único vídeo**, legendas com outro nome (ex.: `Portuguese.srt`) também são associadas.
+- Legendas de **outro release** (`Serie.S04E01.Titulo.x265-Grupo.srt` para `Serie.S04E01.1080p-Outro.mkv`) são associadas pelo **código do episódio**, quando exatamente um vídeo da pasta tem o mesmo código. Nesse caso o idioma só é lido do fim do nome.
+- Fora desses casos, nada é adivinhado.
 - Idioma pelo sufixo: `pt-BR`/`ptbr`/`pob` → Português (Brasil); `pt`/`por`; `en`/`eng`; `es`/`spa`; `fr`, `it`, `de`, `ja`… Marcas `forced` e `sdh` são reconhecidas.
 - A conversão detecta a codificação: UTF-8 (com ou sem BOM), UTF-16 e, como último recurso, **Windows-1252**, comum em legendas brasileiras antigas.
 - A legenda só é servida pelo ID que o scan associou ao vídeo. O ID nunca é usado como caminho, e a leitura passa pela mesma proteção de path traversal do streaming.

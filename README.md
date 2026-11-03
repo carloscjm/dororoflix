@@ -1,6 +1,6 @@
-# MultiFlix (HomeFlix) + Home Media Server
+# GatoFlix (HomeFlix) + Home Media Server
 
-Streaming pessoal na rede local: um servidor no PC Windows disponibiliza os vídeos de `E:\Filmes`, e o app **MultiFlix** para Samsung Smart TV (Tizen) os exibe com interface estilo Netflix: filmes, séries, legendas, "continuar assistindo" e canais ao vivo (IPTV).
+Streaming pessoal na rede local: um servidor no PC Windows disponibiliza os vídeos de `E:\Filmes`, e o app **GatoFlix** para Samsung Smart TV (Tizen) os exibe com interface estilo Netflix: filmes, séries, legendas, "continuar assistindo" e canais ao vivo (IPTV).
 
 | Pasta | O que é |
 |---|---|
@@ -21,7 +21,7 @@ Streaming pessoal na rede local: um servidor no PC Windows disponibiliza os víd
 
 1. Servidor: dois cliques em `home-media-server/iniciar-servidor.bat` (parar: `parar-servidor.bat`; situação: `status-servidor.bat`).
 2. Testar no PC: `npm --prefix homeflix run dev` e abrir `http://localhost:5173`.
-3. Na TV: abrir **MultiFlix** em Apps. Para publicar uma nova versão, veja [`docs/OPERATIONS.md`](docs/OPERATIONS.md#publicar-uma-nova-versão).
+3. Na TV: abrir **GatoFlix** em Apps. Para publicar uma nova versão, veja [`docs/OPERATIONS.md`](docs/OPERATIONS.md#publicar-uma-nova-versão).
 
 ## Desenvolvimento
 

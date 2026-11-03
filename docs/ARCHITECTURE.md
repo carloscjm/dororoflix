@@ -5,7 +5,7 @@
 ```text
  PC Windows (192.168.15.165)                         Samsung Q60C (192.168.15.92, Tizen 9)
 ┌────────────────────────────────────┐   LAN HTTP    ┌──────────────────────────────────────┐
-│ home-media-server (Fastify :8080)  │◄─────────────►│ MultiFlix (homeflix, .wgt)           │
+│ home-media-server (Fastify :8080)  │◄─────────────►│ GatoFlix (homeflix, .wgt)           │
 │  • catálogo / séries / legendas    │  JSON, VTT,   │  • telas + FocusManager + Router     │
 │  • streaming com HTTP Range        │  imagens,     │  • AVPlay (vídeo nativo)             │
 │  • listas IPTV (M3U, cache)        │  Range        │  • histórico em localStorage         │
@@ -27,7 +27,7 @@ LocalFileSource.scan()            → arquivos (vídeo, legenda .srt/.vtt, image
   └ buildLibrary(sourceId, files) → função pura (library-builder.ts)
        ├ classifyVideoPath()      → filme | episódio (série, temporada, episódio)
        ├ applyOverride()          → correções manuais (METADATA_OVERRIDES_FILE)
-       ├ associateSubtitles()     → legendas por nome / subpasta Legenda / pasta de um vídeo só
+       ├ associateSubtitles()     → legendas por nome / subpasta Legenda / pasta de um vídeo só / código do episódio (S04E01)
        └ artwork                  → imagem com o nome do vídeo; ou qualquer imagem da pasta de um único filme / da série
 CatalogService                    → mapas em memória (vídeos, séries); scan concorrente compartilhado
 ```
@@ -65,7 +65,7 @@ HomeScreen (aba "Filmes e Séries")  ── MovieScreen ── PlayerScreen
    └─ SettingsScreen
 ```
 
-- `Router` é uma pilha: telas anteriores ficam ocultas (não destruídas), então Voltar é instantâneo; o foco é restaurado por `data-key`. Voltar na raiz abre "Sair do MultiFlix?".
+- `Router` é uma pilha: telas anteriores ficam ocultas (não destruídas), então Voltar é instantâneo; o foco é restaurado por `data-key`. Voltar na raiz abre "Sair do GatoFlix?".
 - `OverlayManager`: diálogos e menus laterais viram camadas de foco; Voltar fecha a camada.
 
 ### Gerenciador de foco (`navigation/focus-manager.ts`)

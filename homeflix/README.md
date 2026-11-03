@@ -1,6 +1,6 @@
 # HomeFlix — app Samsung Smart TV (Tizen)
 
-> Na TV o app aparece como **MultiFlix** (logo e ícone em `src/assets/brand/` e `tizen/icon.png`). O nome interno do projeto e o ID do pacote (`HmFlxApp01.HomeFlix`) continuam os mesmos para preservar o histórico já salvo na TV.
+> Na TV o app aparece como **GatoFlix** (logo (foto do gato + texto) e ícone em `src/assets/brand/` e `tizen/icon.png`). O nome interno do projeto e o ID do pacote (`HmFlxApp01.HomeFlix`) continuam os mesmos para preservar o histórico já salvo na TV.
 
 Plataforma pessoal de streaming, com interface inspirada na Netflix, para assistir na **Samsung Q60C** aos vídeos do PC servidos pelo [Home Media Server](../home-media-server).
 

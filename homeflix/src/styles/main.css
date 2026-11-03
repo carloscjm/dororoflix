@@ -85,9 +85,32 @@ html.is-playing .screens {
 /* ---------- Marca ---------- */
 
 .brand {
-  display: block;
-  height: 72px;
-  width: auto;
+  display: flex;
+  align-items: center;
+  font-size: 44px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  line-height: 1;
+}
+
+.brand__cat {
+  width: 64px;
+  height: 64px;
+  margin-right: 16px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--brand-2);
+}
+
+.brand__gato {
+  color: var(--text);
+}
+
+.brand__flix {
+  color: var(--brand);
+  background: linear-gradient(90deg, var(--brand), var(--brand-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .topbar {

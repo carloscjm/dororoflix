@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { detectFormat, detectImageFormat, detectSubtitleFormat, mimeTypeFor } from './formats.js';
-import { classifyVideoPath, normalizeKey } from './media-classifier.js';
+import { classifyVideoPath, episodeCodeOf, normalizeKey } from './media-classifier.js';
 import { applyOverride, NO_OVERRIDES, type MetadataOverrides } from './metadata-overrides.js';
 import { parseSubtitleSuffix } from './subtitle-language.js';
 import { titleFromFileName } from './title.js';
@@ -219,7 +219,14 @@ function associateSubtitles(
       match = candidates[0];
       suffix = subtitleBase;
     } else {
-      continue; // ambíguo: não associa
+      // Legenda de outro release ("Serie.S04E01.Titulo.x265-Grupo.srt" para "Serie.S04E01.1080p-Outro.mkv"):
+      // associa pelo código do episódio quando exatamente um vídeo da pasta tem o mesmo código.
+      const code = episodeCodeOf(subtitleBase);
+      const sameEpisode = code === null ? [] : candidates.filter((video) => episodeCodeOf(baseOf(video.relativePath)) === code);
+      if (sameEpisode.length !== 1 || sameEpisode[0] === undefined) continue; // ambíguo: não associa
+      match = sameEpisode[0];
+      // Só os últimos trechos do nome podem indicar idioma (títulos de episódio têm palavras como "It").
+      suffix = subtitleBase.split('.').slice(-2).join('.');
     }
 
     const info = parseSubtitleSuffix(suffix);

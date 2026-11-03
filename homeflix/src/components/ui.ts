@@ -1,7 +1,7 @@
 import type { CardItem, HomeSection } from '../models/library';
 import { h } from '../utils/dom';
 import { displayTitle, hashString } from '../utils/format';
-import logoUrl from '../assets/brand/logo.png';
+import catUrl from '../assets/brand/logo-cat.png';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -84,7 +84,7 @@ export function artwork(
   const placeholder = h(
     'div',
     { class: `artwork__placeholder artwork__placeholder--${variant}` },
-    h('span', { class: 'artwork__mark' }, 'MULTIFLIX'),
+    h('span', { class: 'artwork__mark' }, 'GATOFLIX'),
     h('span', { class: 'artwork__title' }, displayTitle(title)),
   );
   placeholder.style.backgroundImage = `linear-gradient(135deg, hsl(${hue}, 45%, 24%) 0%, hsl(${(hue + 40) % 360}, 55%, 12%) 70%, #0b0b0f 100%)`;
@@ -166,7 +166,13 @@ export function spinner(): HTMLElement {
 }
 
 export function brand(): HTMLElement {
-  return h('img', { class: 'brand', src: logoUrl, alt: 'MultiFlix', decoding: 'async' });
+  return h(
+    'div',
+    { class: 'brand', role: 'img', 'aria-label': 'GatoFlix' },
+    h('img', { class: 'brand__cat', src: catUrl, alt: '', decoding: 'async' }),
+    h('span', { class: 'brand__gato' }, 'GATO'),
+    h('span', { class: 'brand__flix' }, 'FLIX'),
+  );
 }
 
 export type MainTab = 'library' | 'live';

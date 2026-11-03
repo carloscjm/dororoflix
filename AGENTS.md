@@ -10,7 +10,7 @@ Streaming pessoal na rede local, em dois projetos Node independentes no mesmo re
 | Pasta | Papel | Stack |
 |---|---|---|
 | `home-media-server/` | Backend no PC Windows. Lê `E:\Filmes` (somente leitura) e expõe catálogo, séries, legendas, capas, streaming HTTP Range e canais IPTV. | Node ≥ 20.12, TypeScript estrito, Fastify 5, Zod, Vitest |
-| `homeflix/` | App de TV Samsung Tizen (exibido como **MultiFlix**). Interface de 10 pés, controle remoto, player AVPlay. | TypeScript estrito, Vite 8 (bundle IIFE), sem framework de UI, Vitest + happy-dom |
+| `homeflix/` | App de TV Samsung Tizen (exibido como **GatoFlix**). Interface de 10 pés, controle remoto, player AVPlay. | TypeScript estrito, Vite 8 (bundle IIFE), sem framework de UI, Vitest + happy-dom |
 
 Documentação detalhada: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/API.md`](docs/API.md), [`docs/OPERATIONS.md`](docs/OPERATIONS.md), [`docs/DECISIONS.md`](docs/DECISIONS.md).
 
